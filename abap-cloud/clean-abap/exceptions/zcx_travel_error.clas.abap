@@ -1,0 +1,9 @@
+CLASS zcx_travel_error DEFINITION PUBLIC ABSTRACT
+  INHERITING FROM cx_static_check.
+  PUBLIC SECTION.
+    INTERFACES if_t100_dyn_msg.
+ENDCLASS.
+
+CLASS zcx_travel_not_found DEFINITION PUBLIC FINAL
+  INHERITING FROM zcx_travel_error.
+ENDCLASS.
