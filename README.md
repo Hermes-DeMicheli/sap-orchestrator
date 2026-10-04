@@ -12,10 +12,11 @@ Multi-system orchestration framework for SAP ecosystems. Coordinates ABAP Cloud,
 ## Structure
 
 - orchestrator/ -- Python FastAPI workflow engine
-- abap-cloud/ -- ABAP Cloud executors and behavior definitions
-- cap-services/ -- CAP CDS models and service bindings
-- btp-integration/ -- BTP service connectors and Kyma configs
+- abap_cloud/ -- ABAP Cloud executors and behavior definitions
+- cap_services/ -- CAP CDS models and service bindings
+- btp_integration/ -- BTP service connectors and Kyma configs
 - docs/ -- architecture and study notes
+- web/ -- static HTML exercises for ABAP prototyping
 
 ## Quick Start
 

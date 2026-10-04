@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAP ABAP -- Exercise Workshop</title>
+<style>
+  :root {
+    --bg: #f5f5f0;
+    --panel: #ffffff;
+    --border: #cccccc;
+    --text: #1a1a1a;
+    --accent: #0070f3;
+    --success: #1a7a1a;
+    --error: #c0392b;
+    --code-bg: #f0f0f0;
+    --tab-bg: #e0e0e0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+  header { background: #1a1a2e; color: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 1.3rem; font-weight: 600; }
+  header .badge { background: var(--accent); padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; }
+  .tabs { display: flex; border-bottom: 2px solid var(--border); background: var(--tab-bg); }
+  .tab { padding: 10px 20px; cursor: pointer; border: none; background: transparent; font-size: 0.9rem; color: #555; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: var(--panel); margin-bottom: -2px; }
+  .panel { display: none; padding: 24px; max-width: 960px; margin: 0 auto; }
+  .panel.active { display: block; }
+  h2 { font-size: 1.2rem; margin-bottom: 12px; color: #0070f3; }
+  h3 { font-size: 1rem; margin: 16px 0 8px; }
+  p, li { margin-bottom: 8px; }
+  pre { background: var(--code-bg); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; margin: 8px 0 16px; border: 1px solid var(--border); }
+  code { font-family: "Cascadia Code", "Consolas", monospace; }
+  .exercise { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .exercise h4 { margin-bottom: 8px; color: #333; }
+  .exercise p { font-size: 0.9rem; color: #555; }
+  textarea { width: 100%; min-height: 120px; font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.85rem; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: #fafafa; resize: vertical; }
+  button { background: var(--accent); color: #fff; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 8px; }
+  button:hover { opacity: 0.85; }
+  .output { background: #1a1a2e; color: #0f0; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; margin-top: 12px; min-height: 40px; }
+  .hint { background: #fff3cd; border-left: 3px solid #ffc107; padding: 8px 12px; margin: 8px 0; font-size: 0.85rem; border-radius: 4px; }
+  .solution { display: none; background: #e8f5e9; border-left: 3px solid var(--success); padding: 8px 12px; margin: 8px 0; font-size: 0.85rem; border-radius: 4px; }
+  .solution.show { display: block; }
+  .stats { display: flex; gap: 24px; margin-bottom: 16px; font-size: 0.85rem; color: #666; }
+  .stats span { font-weight: 600; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ABAP Exercise Workshop</h1>
+  <span class="badge">RAP &amp; Clean Core</span>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('data')">Data &amp; CDS</button>
+  <button class="tab" onclick="switchTab('behavior')">Behavior Definition</button>
+  <button class="tab" onclick="switchTab('eml')">EML Operations</button>
+  <button class="tab" onclick="switchTab('clean')">Clean ABAP</button>
+</div>
+
+<div id="panel-data" class="panel active">
+  <h2>Exercise 1 -- CDS View Entity</h2>
+  <p>Create a CDS view entity <code>ZC_ORCH_TRAVEL</code> that projects the travel booking data with associations to the driver and vehicle.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Write the CDS view. It must include: entity name, key field, associations to Driver and Vehicle, and a computed column for total price.</p>
+    <textarea id="cds-code" placeholder="Write your CDS view here..."></textarea>
+    <button onclick="checkCDS()">Check</button>
+    <button onclick="showSolution('cds')">Show Solution</button>
+    <div id="output-cds" class="output"></div>
+    <div id="solution-cds" class="solution">
+<pre>@AbapCatalog.sqlViewName: 'ZC_ORCH_TRAVEL'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Orchestrator Travel View'
+define view ZC_ORCH_TRAVEL as select from ztravel {
+  key travel_id,
+  key client_id,
+  driver_name,
+  vehicle_id,
+  distance_km,
+  price_per_km,
+  ( distance_km * price_per_km ) as total_price,
+  _driver,
+  _vehicle
+};</pre>
+    </div>
+  </div>
+
+  <h2>Exercise 2 -- CDS Association</h2>
+  <p>Add an association from the travel view to a driver entity.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Write the association with proper cardinality (one driver per travel).</p>
+    <textarea id="assoc-code" placeholder="Write your association here..."></textarea>
+    <button onclick="checkAssoc()">Check</button>
+    <button onclick="showSolution('assoc')">Show Solution</button>
+    <div id="output-assoc" class="output"></div>
+    <div id="solution-assoc" class="solution">
+<pre>assoc [0..1] _driver : ZC_ORCH_DRIVER on $projection.client_id = _driver.client_id;</pre>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>Exercises completed: <span id="data-count">0</span> / 2</div>
+  </div>
+</div>
+
+<div id="panel-behavior" class="panel">
+  <h2>Exercise 3 -- Behavior Definition</h2>
+  <p>Define a behavior pool for a travel business object with managed implementation.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Write the behavior definition with: managed implementation, draft, and EML statements for create, update, delete.</p>
+    <textarea id="behavior-code" placeholder="Write your behavior definition here..."></textarea>
+    <button onclick="checkBehavior()">Check</button>
+    <button onclick="showSolution('behavior')">Show Solution</button>
+    <div id="output-behavior" class="output"></div>
+    <div id="solution-behavior" class="solution">
+<pre>managed implementation in class zbp_orch_travel unique;
+draft;
+define behavior for ZC_ORCH_TRAVEL
+{
+  create;
+  update;
+  delete;
+  action submit;
+  action cancel;
+}</pre>
+    </div>
+  </div>
+
+  <h2>Exercise 4 -- EML Update with Failed Handling</h2>
+  <p>Write an EML MODIFY statement that updates the travel status and handles failures.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Use FAILED FINAL and REPORTED FINAL clauses. The status must be updated only for valid keys.</p>
+    <textarea id="eml-code" placeholder="Write your EML statement here..."></textarea>
+    <button onclick="checkEML()">Check</button>
+    <button onclick="showSolution('eml')">Show Solution</button>
+    <div id="output-eml" class="output"></div>
+    <div id="solution-eml" class="solution">
+<pre>MODIFY ENTITIES OF zorch_travel
+  ENTITY Travel
+    UPDATE FIELDS ( OverallStatus )
+    WITH VALUE #( ( %tky = travel_key-%tky OverallStatus = 'A' ) )
+  FAILED   FINAL(failed_modify)
+  REPORTED FINAL(reported_modify).</pre>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>Exercises completed: <span id="behavior-count">0</span> / 2</div>
+  </div>
+</div>
+
+<div id="panel-eml" class="panel">
+  <h2>Exercise 5 -- AMDP Method</h2>
+  <p>Write an AMDP method that calculates the total revenue per driver for a given date range.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Use SQLScript with parameters and return a table with driver_id and total_revenue.</p>
+    <textarea id="amdp-code" placeholder="Write your AMDP method here..."></textarea>
+    <button onclick="checkAMDP()">Check</button>
+    <button onclick="showSolution('amdp')">Show Solution</button>
+    <div id="output-amdp" class="output"></div>
+    <div id="solution-amdp" class="solution">
+<pre>CLASS zcl_orch_amdp DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    CLASS-METHODS get_driver_revenue
+      IMPORTING iv_date_from TYPE d
+                iv_date_to   TYPE d
+      RETURNING VALUE(rt_result) TYPE TABLE OF zdriver_revenue.
+ENDCLASS.
+
+CLASS zcl_orch_amdp IMPLEMENTATION.
+  METHOD get_driver_revenue BY DATABASE FUNCTION
+    FOR HDB
+    LANGUAGE SQLSCRIPT
+    OPTIONS READ-ONLY
+    USING ztravel.
+    rt_result = SELECT driver_id, SUM( distance_km * price_per_km ) AS total_revenue
+                FROM ztravel
+                WHERE travel_date BETWEEN :iv_date_from AND :iv_date_to
+                GROUP BY driver_id;
+  ENDMETHOD.
+ENDCLASS.</pre>
+    </div>
+  </div>
+
+  <h2>Exercise 6 -- Exception Class</h2>
+  <p>Create a typed exception class for orchestrator errors.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Define an exception class inheriting from cx_static_check with a custom constructor that accepts a message and a code.</p>
+    <textarea id="exc-code" placeholder="Write your exception class here..."></textarea>
+    <button onclick="checkExc()">Check</button>
+    <button onclick="showSolution('exc')">Show Solution</button>
+    <div id="output-exc" class="output"></div>
+    <div id="solution-exc" class="solution">
+<pre>CLASS zcx_orch_error DEFINITION
+  INHERITING FROM cx_static_check
+  CREATE PUBLIC.
+  PUBLIC SECTION.
+    DATA: mv_code TYPE string.
+    METHODS: constructor IMPORTING iv_message TYPE string
+                                  iv_code    TYPE string.
+ENDCLASS.
+
+CLASS zcx_orch_error IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( EXPORTING textid = iv_message ).
+    mv_code = iv_code.
+  ENDMETHOD.
+ENDCLASS.</pre>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>Exercises completed: <span id="eml-count">0</span> / 2</div>
+  </div>
+</div>
+
+<div id="panel-clean" class="panel">
+  <h2>Exercise 7 -- Clean ABAP: Value Object</h2>
+  <p>Create an immutable value object for TravelData with validation in the constructor.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Define a class with FINAL, no public setter, and a factory method that validates input.</p>
+    <textarea id="vo-code" placeholder="Write your value object here..."></textarea>
+    <button onclick="checkVO()">Check</button>
+    <button onclick="showSolution('vo')">Show Solution</button>
+    <div id="output-vo" class="output"></div>
+    <div id="solution-vo" class="solution">
+<pre>CLASS zcl_travel_data DEFINITION
+  FINAL
+  CREATE PRIVATE.
+  PUBLIC SECTION.
+    DATA: mv_travel_id TYPE string READ-ONLY,
+          mv_driver_id TYPE string READ-ONLY,
+          mv_distance  TYPE i READ-ONLY.
+    CLASS-METHODS create
+      IMPORTING iv_travel_id TYPE string
+                iv_driver_id TYPE string
+                iv_distance  TYPE i
+      RETURNING VALUE(ro_instance) TYPE REF TO zcl_travel_data.
+  PRIVATE SECTION.
+    METHODS constructor
+      IMPORTING iv_travel_id TYPE string
+                iv_driver_id TYPE string
+                iv_distance  TYPE i.
+ENDCLASS.
+
+CLASS zcl_travel_data IMPLEMENTATION.
+  METHOD create.
+    IF iv_distance <= 0.
+      RAISE EXCEPTION TYPE zcx_orch_error
+        EXPORTING iv_message = 'Distance must be positive'
+                  iv_code    = 'INVALID_DISTANCE'.
+    ENDIF.
+    ro_instance = NEW #( iv_travel_id = iv_travel_id
+                         iv_driver_id = iv_driver_id
+                         iv_distance  = iv_distance ).
+  ENDMETHOD.
+  METHOD constructor.
+    mv_travel_id = iv_travel_id.
+    mv_driver_id = iv_driver_id.
+    mv_distance  = iv_distance.
+  ENDMETHOD.
+ENDCLASS.</pre>
+    </div>
+  </div>
+
+  <h2>Exercise 8 -- Clean Core Level A: Service Binding</h2>
+  <p>Define a service binding for the orchestrator travel API.</p>
+  <div class="exercise">
+    <h4>Task</h4>
+    <p>Create a service definition and binding for OData V4 with transactional query contract.</p>
+    <textarea id="service-code" placeholder="Write your service definition here..."></textarea>
+    <button onclick="checkService()">Check</button>
+    <button onclick="showSolution('service')">Show Solution</button>
+    <div id="output-service" class="output"></div>
+    <div id="solution-service" class="solution">
+<pre>@EndUserText.label: 'Orchestrator Travel Service'
+define service ZORCH_TRAVEL_SRV {
+  expose ZC_ORCH_TRAVEL as Travel;
+}
+
+define binding ZORCH_TRAVEL_O4 for ZORCH_TRAVEL_SRV {
+  Travel;
+}</pre>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>Exercises completed: <span id="clean-count">0</span> / 2</div>
+  </div>
+</div>
+
+<script>
+  var counts = { data: 0, behavior: 0, eml: 0, clean: 0 };
+  var solutions = {
+    cds: 'solution-cds',
+    assoc: 'solution-assoc',
+    behavior: 'solution-behavior',
+    eml: 'solution-eml',
+    amdp: 'solution-amdp',
+    exc: 'solution-exc',
+    vo: 'solution-vo',
+    service: 'solution-service'
+  };
+
+  function switchTab(name) {
+    var tabs = document.querySelectorAll('.tab');
+    var panels = document.querySelectorAll('.panel');
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    panels.forEach(function(p) { p.classList.remove('active'); });
+    document.querySelector('.tab:nth-child(' + (name === 'data' ? 1 : name === 'behavior' ? 2 : name === 'eml' ? 3 : 4) + ')').classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  function checkCDS() {
+    var code = document.getElementById('cds-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-cds');
+    if (code.indexOf('DEFINE VIEW') >= 0 && code.indexOf('ZC_ORCH_TRAVEL') >= 0) {
+      out.textContent = 'PASS -- CDS view entity defined correctly.';
+      out.style.color = '#0f0';
+      counts.data++;
+    } else {
+      out.textContent = 'FAIL -- Expected DEFINE VIEW ZC_ORCH_TRAVEL with key fields and associations.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('data-count').textContent = counts.data;
+  }
+
+  function checkAssoc() {
+    var code = document.getElementById('assoc-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-assoc');
+    if (code.indexOf('ASSOC') >= 0 && code.indexOf('ZC_ORCH_DRIVER') >= 0) {
+      out.textContent = 'PASS -- Association defined.';
+      out.style.color = '#0f0';
+      counts.data++;
+    } else {
+      out.textContent = 'FAIL -- Expected assoc [0..1] _driver : ZC_ORCH_DRIVER.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('data-count').textContent = counts.data;
+  }
+
+  function checkBehavior() {
+    var code = document.getElementById('behavior-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-behavior');
+    if (code.indexOf('MANAGED IMPLEMENTATION') >= 0 && code.indexOf('DEFINE BEHAVIOR') >= 0) {
+      out.textContent = 'PASS -- Behavior definition correct.';
+      out.style.color = '#0f0';
+      counts.behavior++;
+    } else {
+      out.textContent = 'FAIL -- Expected MANAGED IMPLEMENTATION and DEFINE BEHAVIOR.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('behavior-count').textContent = counts.behavior;
+  }
+
+  function checkEML() {
+    var code = document.getElementById('eml-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-eml');
+    if (code.indexOf('MODIFY ENTITIES') >= 0 && code.indexOf('FAILED') >= 0 && code.indexOf('REPORTED') >= 0) {
+      out.textContent = 'PASS -- EML MODIFY with error handling.';
+      out.style.color = '#0f0';
+      counts.eml++;
+    } else {
+      out.textContent = 'FAIL -- Expected MODIFY ENTITIES with FAILED FINAL and REPORTED FINAL.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('eml-count').textContent = counts.eml;
+  }
+
+  function checkAMDP() {
+    var code = document.getElementById('amdp-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-amdp');
+    if (code.indexOf('AMDP') >= 0 || code.indexOf('DATABASE FUNCTION') >= 0) {
+      out.textContent = 'PASS -- AMDP method defined.';
+      out.style.color = '#0f0';
+      counts.eml++;
+    } else {
+      out.textContent = 'FAIL -- Expected DATABASE FUNCTION or AMDP marker.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('eml-count').textContent = counts.eml;
+  }
+
+  function checkExc() {
+    var code = document.getElementById('exc-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-exc');
+    if (code.indexOf('CX_STATIC_CHECK') >= 0 && code.indexOf('ZCX_ORCH_ERROR') >= 0) {
+      out.textContent = 'PASS -- Exception class defined.';
+      out.style.color = '#0f0';
+      counts.clean++;
+    } else {
+      out.textContent = 'FAIL -- Expected INHERITING FROM cx_static_check.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('clean-count').textContent = counts.clean;
+  }
+
+  function checkVO() {
+    var code = document.getElementById('vo-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-vo');
+    if (code.indexOf('FINAL') >= 0 && code.indexOf('CREATE PRIVATE') >= 0 && code.indexOf('READ-ONLY') >= 0) {
+      out.textContent = 'PASS -- Immutable value object.';
+      out.style.color = '#0f0';
+      counts.clean++;
+    } else {
+      out.textContent = 'FAIL -- Expected FINAL, CREATE PRIVATE, READ-ONLY attributes.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('clean-count').textContent = counts.clean;
+  }
+
+  function checkService() {
+    var code = document.getElementById('service-code').value.trim().toUpperCase();
+    var out = document.getElementById('output-service');
+    if (code.indexOf('DEFINE SERVICE') >= 0 && code.indexOf('EXPOSE') >= 0) {
+      out.textContent = 'PASS -- Service definition correct.';
+      out.style.color = '#0f0';
+      counts.clean++;
+    } else {
+      out.textContent = 'FAIL -- Expected DEFINE SERVICE with EXPOSE clause.';
+      out.style.color = '#f00';
+    }
+    document.getElementById('clean-count').textContent = counts.clean;
+  }
+
+  function showSolution(key) {
+    var el = document.getElementById(solutions[key]);
+    if (el) el.classList.toggle('show');
+  }
+</script>
+</body>
+</html>

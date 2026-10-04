@@ -5,8 +5,8 @@ Business logic executors for ABAP Cloud (RAP, Clean ABAP).
 ## Structure
 
 - behavior/ -- Behavior definitions and pool implementations
-- cds-views/ -- CDS views for projections and interfaces
-- clean-abap/ -- AMDP, exception classes, EML examples
+- cds_views/ -- CDS views for projections and interfaces
+- clean_abap/ -- AMDP, exception classes, EML examples
 
 ## Convention
 
