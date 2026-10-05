@@ -1,0 +1,36 @@
+# Local dev stack — SAP Orchestrator + dependents
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: orchestrator/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      - ORCHESTRATOR_LOG_LEVEL=DEBUG
+      - HANA_CONN_STR=${HANA_CONN_STR}
+      - BTP_DEST_URL=${BTP_DEST_URL}
+      - ABAP_CLOUD_URL=${ABAP_CLOUD_URL}
+    depends_on:
+      hana:
+        condition: service_healthy
+
+  hana:
+    image: sap/hana-cloud:latest
+    ports:
+      - "39013:39013"
+    environment:
+      - HANA_USER=SYSTEM
+      - HANA_PASSWORD=${HANA_PASSWORD}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:39013')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Optional: local Kyma/Event Mesh simulation via NATS
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
